@@ -13,7 +13,8 @@ def load_texture(path):
 start = False
 
 app = Ursina()
-modeler = Entity(model='cube',texture="brick")
+modeler = Entity(model='quad',texture="brick")
+bg = Entity(model='quad',color=color.white,scale=3,z=5)
 texture_field = InputField(y=.4,register_mouse_input=True, default_value='path/to/pics/here', active=True)
 
 b = Button(model='quad', scale=.1, y=.3, color=color.lime, text='retexture', text_size=.5, text_color=color.black)
@@ -51,8 +52,6 @@ def crop_images(folder_path, output_folder="output", crop_box=(666, 342, 861, 52
               os.remove(image_path)
           except (IOError, OSError) as e:
               print(f"Error processing {filename}: {e}")
-
-b2.on_click = crop_images("video_temp")
 
 def start_session():
     if angledeb.value != 0 or angledeb2.value != 0 or angledeb3.value != 0:
