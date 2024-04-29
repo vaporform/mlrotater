@@ -15,7 +15,10 @@ start = False
 app = Ursina()
 modeler = Entity(model='quad',texture="brick")
 bg = Entity(model='quad',color=color.white,scale=3,z=5)
-texture_field = InputField(y=.4,register_mouse_input=True, default_value='path/to/pics/here', active=True)
+texture_field = InputField(y=.4,x=-.5,register_mouse_input=True, default_value='path/to/pics/here', active=True)
+save_field = InputField(y=.45,x=-.5,register_mouse_input=True, default_value='your image out name here', active=True)
+my_video_dir = "C:/Users/Maste/Downloads/mlrotater-main/mlrotater-main/video_temp"
+my_output_folder = "C:/Users/Maste/Downloads/output"
 
 b = Button(model='quad', scale=.1, y=.3, color=color.lime, text='retexture', text_size=.5, text_color=color.black)
 b2 = Button(model='quad', scale=.1, y=.2, color=color.red, text='convert', text_size=.5, text_color=color.black)
@@ -36,23 +39,6 @@ def on_button_click():
 
 b.on_click = on_button_click  # Assign the click handler
 
-def crop_images(folder_path, output_folder="output", crop_box=(666, 342, 861, 520)):
-  # Create the output folder if it doesn't exist
-  if not os.path.exists(output_folder):
-      os.makedirs(output_folder)
-
-  for filename in os.listdir(folder_path):
-      # Check for image extensions (modify as needed)
-      if filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg"):
-          image_path = os.path.join(folder_path, filename)
-          try:
-              img = Image.open(image_path)
-              cropped_img = img.crop(crop_box)
-              cropped_img.save(os.path.join(output_folder, filename))
-              os.remove(image_path)
-          except (IOError, OSError) as e:
-              print(f"Error processing {filename}: {e}")
-
 def start_session():
     if angledeb.value != 0 or angledeb2.value != 0 or angledeb3.value != 0:
         global start
@@ -64,7 +50,26 @@ def start_session():
 
 b3.on_click = start_session
 
+def crop_image():
+    my_video_dir = "C:/Users/Maste/Downloads/video_temp"
+    my_output_folder = "C:/Users/Maste/Downloads/output"
+    my_newsubf = f"C:/Users/Maste/Downloads/output/{str(save_field.text)}"
+    i = 0
+    for filename in os.listdir(my_video_dir):
+        i += 1
+        print(filename)
+        img = Image.open(os.path.join(my_video_dir, filename))
+        #715, 349, 820, 484
+        left, top, right, bottom = 715, 379, 820, 484
+        cropped_img = img.crop((left, top, right, bottom))
+        if not os.path.exists(my_newsubf):
+            os.mkdir(os.path.join(my_output_folder, str(save_field.text)))
+        
+        cropped_img.save(os.path.join(my_newsubf, f"{save_field.text}{i}.png"))
+    print("Success!")
+b2.on_click = crop_image  # Assign the click handler
 def update():
+    c,v,b = 0,0,0
     global start
     if not start:
         modeler.rotation = 0
@@ -72,10 +77,9 @@ def update():
         modeler.rotation_x += int(angledeb.value)
         modeler.rotation_y += int(angledeb2.value)
         modeler.rotation_z += int(angledeb3.value)
-
-        if modeler.rotation_x >= 360 or modeler.rotation_y >= 360 or modeler.rotation_z >= 360:
+        
+        if abs(modeler.rotation_x) >= 360 or abs(modeler.rotation_y) >= 360 or abs(modeler.rotation_z) >= 360:
             vr.stop_recording()
             start = not start
-            crop_images("video_temp")
-
+            crop_image()
 app.run()
